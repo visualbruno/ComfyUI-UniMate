@@ -98,10 +98,12 @@ def _digest(path: Path, extra: str = "") -> str:
     return h.hexdigest()[:16]
 
 
-def _run(cmd: list[str], cwd: Path, what: str, timeout: int = 3600) -> str:
+def _run(cmd: list[str], cwd: Path, what: str, timeout: int = 3600,
+         env: dict | None = None) -> str:
     """Run a subprocess, raising with its tail if it fails."""
     done = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True,
-                          timeout=timeout, encoding="utf-8", errors="replace")
+                          timeout=timeout, encoding="utf-8", errors="replace",
+                          env=env)
     if done.returncode != 0:
         tail = "\n".join((done.stderr or done.stdout or "").strip().splitlines()[-25:])
         raise RuntimeError(f"{what} failed (exit {done.returncode}):\n{tail}")
@@ -387,7 +389,10 @@ class UniMateMeshSampler:
                                       "default": "An object walks forward.",
                                       "tooltip": "Write like the training captions: "
                                                  "start with 'An object' and describe ONE "
-                                                 "motion, not the character."}),
+                                                 "motion, not the character. "
+                                                 "ONE PROMPT PER LINE chains the clip: "
+                                                 "each line is another 2 s segment, "
+                                                 "stitched into one long motion."}),
                 "cfg_scale": ("FLOAT", {"default": 3.0, "min": 1.0, "max": 10.0, "step": 0.5,
                                         "tooltip": "How strongly the prompt is followed. "
                                                    "Raise to 5-7 when a prompt is ignored; "
@@ -399,6 +404,15 @@ class UniMateMeshSampler:
                                                        "several and keep the best."}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFF}),
             },
+            "optional": {
+                "chain_overlap": ("INT", {"default": 10, "min": 1, "max": 59,
+                                          "tooltip": "Frames shared between consecutive "
+                                                     "segments when the prompt has several "
+                                                     "lines. The model blends the handover "
+                                                     "across them, so raise it (15-20) when "
+                                                     "a transition snaps. Ignored for a "
+                                                     "single-line prompt."}),
+            },
         }
 
     RETURN_TYPES = ("UNIMATE_MOTION", "STRING")
@@ -406,14 +420,33 @@ class UniMateMeshSampler:
     FUNCTION = "sample"
     CATEGORY = CATEGORY
     DESCRIPTION = ("Runs UniMate's sampler on the prepared asset. Each repetition is a "
-                   "separate clip of the checkpoint's frame length (60 frames = 2 s).")
+                   "separate clip of the checkpoint's frame length (60 frames = 2 s). "
+                   "Put one prompt per line to chain segments into a longer motion: "
+                   "N segments give 60 + (60 - chain_overlap) * (N - 1) frames.")
 
     def sample(self, model: dict, asset: dict, prompt: str, cfg_scale: float,
-               num_repetitions: int, seed: int):
+               num_repetitions: int, seed: int, chain_overlap: int = 10):
         repo = find_repo()
-        text = prompt.strip()
-        if not text:
+        # One prompt per line. Several lines chain 60-frame segments into one
+        # long motion; a single line is the plain one-clip case.
+        segments = [line.strip() for line in prompt.splitlines() if line.strip()]
+        if not segments:
             raise RuntimeError("The prompt is empty.")
+        text = segments[0]
+        chained = len(segments) > 1
+
+        frames = int(model.get("frames", 60)) or 60
+        overlap = int(chain_overlap)
+        if chained:
+            if cfg_scale <= 1.0:
+                raise RuntimeError(
+                    "Chaining several prompts needs cfg_scale > 1.0: every segment after "
+                    "the first is conditioned on its own caption, and at cfg 1.0 the "
+                    "caption is zeroed. Use a single-line prompt, or raise cfg_scale.")
+            if not 0 < overlap < frames:
+                raise RuntimeError(
+                    f"chain_overlap must be between 1 and {frames - 1} for this "
+                    f"checkpoint ({frames}-frame window); got {overlap}.")
 
         stamp = f"{int(time.time() * 1000):x}"
         out_dir = Path(folder_paths.get_output_directory()) / "unimate_motion" / stamp
@@ -433,29 +466,34 @@ class UniMateMeshSampler:
                "--exp_dir", model["exp_dir"],
                "--model_path", model["checkpoint"],
                "--asset", asset["dir"],
-               "--prompt", text,
+               # `--prompt` is a variadic tuple: every segment follows the one
+               # flag. Repeating the flag keeps only the last value, which
+               # silently collapses a chain back to a single clip.
+               "--prompt", *segments,
                "--num_repetitions", str(int(num_repetitions)),
                "--cfg_scale", str(float(cfg_scale)),
                "--seed", str(int(seed)),
                "--only_save_motion",
                "--output_dir", str(out_dir)]
-        env_repo = str(repo)
+        if chained:
+            cmd += ["--motion_expand", "--expand_overlap", str(overlap)]
+        # An explicit env rather than mutating os.environ: two prompts sampling
+        # at once would otherwise clobber each other's PYTHONPATH. UniMate logs
+        # a '->' that cp1252 consoles cannot encode, hence the forced UTF-8.
         prev = os.environ.get("PYTHONPATH", "")
-        os.environ["PYTHONPATH"] = os.pathsep.join(
-            p for p in (env_repo, str(repo / "Motion"), prev) if p)
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join(
+            p for p in (str(repo), str(repo / "Motion"), prev) if p)
+        env["PYTHONIOENCODING"] = "utf-8"
         started = time.time()
-        try:
-            _run(cmd, repo, "unimate.inference.sample")
-        finally:
-            if prev:
-                os.environ["PYTHONPATH"] = prev
-            else:
-                os.environ.pop("PYTHONPATH", None)
+        _run(cmd, repo, "unimate.inference.sample", env=env)
 
-        clips = sorted((out_dir / "motions").glob("*.npy"))
+        # A chained run lands in a motion_expand/ sibling of the plain output.
+        motions = out_dir / ("motion_expand/motions" if chained else "motions")
+        clips = sorted(motions.glob("*.npy"))
         if not clips:
             raise RuntimeError(
-                f"The sampler wrote no motions into {out_dir}. If the asset has more "
+                f"The sampler wrote no motions into {motions}. If the asset has more "
                 f"joints than the checkpoint takes it refuses silently -- check the "
                 f"preparation report.")
         handle = {
@@ -463,9 +501,17 @@ class UniMateMeshSampler:
             "asset_dir": asset["dir"],
             "fps": 30.0,
             "prompt": text,
+            "segments": segments,
         }
-        info = (f"{len(clips)} clip(s) in {time.time() - started:.0f}s | cfg {cfg_scale} "
-                f"| seed {seed}\n" + "\n".join(p.name for p in clips))
+        lines = []
+        for clip in clips:
+            n = int(np.load(clip, allow_pickle=True).shape[0])
+            lines.append(f"{clip.name}: {n} frames, {n / 30.0:.2f}s")
+        head = (f"{len(clips)} clip(s) in {time.time() - started:.0f}s | cfg {cfg_scale} "
+                f"| seed {seed}")
+        if chained:
+            head += f"\n{len(segments)} segments chained, overlap {overlap}"
+        info = head + "\n" + "\n".join(lines)
         return (handle, info)
 
 

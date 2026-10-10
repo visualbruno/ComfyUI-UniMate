@@ -1,0 +1,526 @@
+{
+  "id": "15ba4b2c-46e0-4894-8387-66c77f498521",
+  "revision": 0,
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "UniMateModelLoader",
+      "pos": [
+        -1441.5910409171945,
+        352.1317277116357
+      ],
+      "size": [
+        416.67069267840384,
+        147.59115594884662
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "UNIMATE_MODEL",
+          "links": [
+            2,
+            4
+          ]
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
+        "Node name for S&R": "UniMateModelLoader"
+      },
+      "widgets_values": [
+        "unimate_uniml3d_f60_v3",
+        "latest",
+        ""
+      ],
+      "widgets_values_named": {
+        "run": "unimate_uniml3d_f60_v3",
+        "checkpoint": "latest",
+        "run_path": ""
+      }
+    },
+    {
+      "id": 4,
+      "type": "UniMateMeshLoader",
+      "pos": [
+        -1382.7739232541833,
+        1.462295196964285
+      ],
+      "size": [
+        346.68569107302926,
+        107.95617977618286
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "rigged_mesh",
+          "type": "STRING",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
+        "Node name for S&R": "UniMateMeshLoader"
+      },
+      "widgets_values": [
+        "1790714056873-807175839.glb",
+        "C:\\Git\\ComfyUI\\output\\Rimuru.glb"
+      ],
+      "widgets_values_named": {
+        "mesh": "1790714056873-807175839.glb",
+        "mesh_path": "C:\\Git\\ComfyUI\\output\\Rimuru.glb"
+      }
+    },
+    {
+      "id": 5,
+      "type": "UniMateMeshPreparation",
+      "pos": [
+        -963.5931139414913,
+        148.87744644463618
+      ],
+      "size": [
+        275.925390625,
+        150
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "rigged_mesh",
+          "type": "STRING",
+          "link": 1
+        },
+        {
+          "name": "model",
+          "type": "UNIMATE_MODEL",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "asset",
+          "type": "UNIMATE_ASSET",
+          "links": [
+            3,
+            6
+          ]
+        },
+        {
+          "name": "report",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
+        "Node name for S&R": "UniMateMeshPreparation"
+      },
+      "widgets_values": [
+        "Rimuru",
+        "",
+        "",
+        false
+      ],
+      "widgets_values_named": {
+        "name": "Rimuru",
+        "face_right": "",
+        "face_left": "",
+        "force_rebuild": false
+      }
+    },
+    {
+      "id": 6,
+      "type": "UniMateMeshSampler",
+      "pos": [
+        -608.6984477626335,
+        352.13176179310466
+      ],
+      "size": [
+        400,
+        264.48155426710014
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "UNIMATE_MODEL",
+          "link": 4
+        },
+        {
+          "name": "asset",
+          "type": "UNIMATE_ASSET",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "motion",
+          "type": "UNIMATE_MOTION",
+          "links": [
+            5
+          ]
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
+        "Node name for S&R": "UniMateMeshSampler"
+      },
+      "widgets_values": [
+        "A human performs a jump\nA human kicks horizontaly",
+        3,
+        1,
+        12345,
+        "fixed",
+        10
+      ],
+      "widgets_values_named": {
+        "prompt": "A human performs a jump\nA human kicks horizontaly",
+        "cfg_scale": 3,
+        "num_repetitions": 1,
+        "seed": 12345,
+        "control_after_generate": "fixed",
+        "chain_overlap": 10
+      }
+    },
+    {
+      "id": 7,
+      "type": "UniMateMeshExport",
+      "pos": [
+        -143.6489759852641,
+        150.04522814259147
+      ],
+      "size": [
+        270,
+        122
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "asset",
+          "type": "UNIMATE_ASSET",
+          "link": 6
+        },
+        {
+          "name": "motion",
+          "type": "UNIMATE_MOTION",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_3d",
+          "shape": 6,
+          "type": "FILE_3D_GLB",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "glb_path",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
+        "Node name for S&R": "UniMateMeshExport"
+      },
+      "widgets_values": [
+        "UniMate",
+        30
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "UniMate",
+        "fps": 30
+      }
+    },
+    {
+      "id": 8,
+      "type": "Preview3DAdvanced",
+      "pos": [
+        194.63954009419425,
+        148.87724195582192
+      ],
+      "size": [
+        797.5539087430834,
+        869.268465344779
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_3d",
+          "type": "FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "link": 7
+        },
+        {
+          "name": "model_3d_info",
+          "shape": 7,
+          "type": "LOAD3D_MODEL_INFO",
+          "link": null
+        },
+        {
+          "name": "camera_info",
+          "shape": 7,
+          "type": "LOAD3D_CAMERA",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_3d",
+          "type": "FILE_3D",
+          "links": null
+        },
+        {
+          "name": "model_3d_info",
+          "type": "LOAD3D_MODEL_INFO",
+          "links": null
+        },
+        {
+          "name": "camera_info",
+          "type": "LOAD3D_CAMERA",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.39.0",
+        "Node name for S&R": "Preview3DAdvanced",
+        "Camera Config": {
+          "cameraType": "perspective",
+          "fov": 35,
+          "hasCustomUp": false,
+          "state": {
+            "position": {
+              "x": 1.6471328057260979,
+              "y": 1.1105303191056821,
+              "z": 3.2610333167995886
+            },
+            "target": {
+              "x": -0.1331665162855701,
+              "y": 0.798122011655761,
+              "z": -0.06375823470124042
+            },
+            "zoom": 1,
+            "cameraType": "perspective",
+            "quaternion": {
+              "x": -0.04006984865985908,
+              "y": 0.2431309638268697,
+              "z": 0.010052715637537834,
+              "w": 0.9691133496992517
+            },
+            "fov": 35,
+            "aspect": 1,
+            "near": 0.01,
+            "far": 10000,
+            "frustum": {
+              "left": -5,
+              "right": 5,
+              "top": 5,
+              "bottom": -5
+            }
+          }
+        },
+        "Last Time Model File": "preview3d_advanced_5589df8506f8457c81ed0335b1879069.glb",
+        "Last Time Model Folder": "temp",
+        "Light Config": {
+          "intensity": 3,
+          "hdri": {
+            "enabled": false,
+            "hdriPath": "",
+            "showAsBackground": false,
+            "intensity": 1
+          }
+        },
+        "Scene Config": {
+          "showGrid": true,
+          "backgroundColor": "#282828",
+          "backgroundImage": "",
+          "backgroundRenderMode": "tiled",
+          "models": [
+            {
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "quaternion": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "scale": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              }
+            }
+          ]
+        },
+        "Model Config": {
+          "upDirection": "original",
+          "materialMode": "original",
+          "showSkeleton": false,
+          "gizmo": {
+            "enabled": false,
+            "mode": "translate",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "scale": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            }
+          }
+        }
+      },
+      "widgets_values": [
+        "",
+        1024,
+        1024
+      ],
+      "widgets_values_named": {
+        "viewport_state": "",
+        "width": 1024,
+        "height": 1024
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      4,
+      0,
+      5,
+      0,
+      "STRING"
+    ],
+    [
+      2,
+      2,
+      0,
+      5,
+      1,
+      "UNIMATE_MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      6,
+      1,
+      "UNIMATE_ASSET"
+    ],
+    [
+      4,
+      2,
+      0,
+      6,
+      0,
+      "UNIMATE_MODEL"
+    ],
+    [
+      5,
+      6,
+      0,
+      7,
+      1,
+      "UNIMATE_MOTION"
+    ],
+    [
+      6,
+      5,
+      0,
+      7,
+      0,
+      "UNIMATE_ASSET"
+    ],
+    [
+      7,
+      7,
+      0,
+      8,
+      0,
+      "FILE_3D_GLB"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6727499949325636,
+      "offset": [
+        1704.2460000748283,
+        258.2572415208326
+      ]
+    },
+    "frontendVersion": "1.55.14",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

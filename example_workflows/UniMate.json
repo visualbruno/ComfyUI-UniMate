@@ -35,6 +35,8 @@
         }
       ],
       "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
         "Node name for S&R": "UniMateModelLoader"
       },
       "widgets_values": [
@@ -78,6 +80,8 @@
         }
       ],
       "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
         "Node name for S&R": "UniMateMeshLoader"
       },
       "widgets_values": [
@@ -131,6 +135,8 @@
         }
       ],
       "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
         "Node name for S&R": "UniMateMeshPreparation"
       },
       "widgets_values": [
@@ -155,7 +161,7 @@
       ],
       "size": [
         400,
-        204
+        264.48155426710014
       ],
       "flags": {},
       "order": 3,
@@ -187,21 +193,25 @@
         }
       ],
       "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
         "Node name for S&R": "UniMateMeshSampler"
       },
       "widgets_values": [
-        "An object walks in place",
+        "A human performs a jump",
         3,
         1,
         12345,
-        "fixed"
+        "fixed",
+        10
       ],
       "widgets_values_named": {
-        "prompt": "An object walks in place",
+        "prompt": "A human performs a jump",
         "cfg_scale": 3,
         "num_repetitions": 1,
         "seed": 12345,
-        "control_after_generate": "fixed"
+        "control_after_generate": "fixed",
+        "chain_overlap": 10
       }
     },
     {
@@ -252,14 +262,16 @@
         }
       ],
       "properties": {
+        "aux_id": "visualbruno/ComfyUI-UniMate",
+        "ver": "e1468f18e413b618fcdec2ec766929a3ab74f06e",
         "Node name for S&R": "UniMateMeshExport"
       },
       "widgets_values": [
-        "Rimuru_Walking",
+        "UniMate",
         30
       ],
       "widgets_values_named": {
-        "filename_prefix": "Rimuru_Walking",
+        "filename_prefix": "UniMate",
         "fps": 30
       }
     },
@@ -333,22 +345,22 @@
           "hasCustomUp": false,
           "state": {
             "position": {
-              "x": 1.630450706076803,
-              "y": 1.1027677139424297,
-              "z": 3.2706309679037355
+              "x": 1.6471328057260979,
+              "y": 1.1105303191056821,
+              "z": 3.2610333167995886
             },
             "target": {
-              "x": -0.13316384349496918,
-              "y": 0.7981227552441611,
-              "z": -0.06375932975616964
+              "x": -0.1331665162855701,
+              "y": 0.798122011655761,
+              "z": -0.06375823470124042
             },
             "zoom": 1,
             "cameraType": "perspective",
             "quaternion": {
-              "x": -0.03909734315545365,
-              "y": 0.2406687351416031,
-              "z": 0.009702814397821242,
-              "w": 0.9697710106392574
+              "x": -0.04006984865985908,
+              "y": 0.2431309638268697,
+              "z": 0.010052715637537834,
+              "w": 0.9691133496992517
             },
             "fov": 35,
             "aspect": 1,
@@ -362,7 +374,7 @@
             }
           }
         },
-        "Last Time Model File": "preview3d_advanced_9b98027079e942debff3c7189f493888.glb",
+        "Last Time Model File": "preview3d_advanced_5589df8506f8457c81ed0335b1879069.glb",
         "Last Time Model Folder": "temp",
         "Light Config": {
           "intensity": 3,
@@ -498,10 +510,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6115909044841478,
+      "scale": 0.6727499949325636,
       "offset": [
-        1615.885679937961,
-        281.77835808688127
+        1704.2460000748283,
+        258.2572415208326
       ]
     },
     "frontendVersion": "1.55.14",

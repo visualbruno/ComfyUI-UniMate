@@ -57,7 +57,7 @@ UniMate's venv is elsewhere, point `UNIMATE_PYTHON` at an interpreter that can
 | **Model Loader** | Picks a checkpoint run; reports its joint/frame limits | instant |
 | **Mesh Loader** | Picks a rigged GLB/GLTF/FBX. Takes ComfyUI-SkinToken's `rigged_path` directly | instant |
 | **Mesh Preparation** | `rig_preprocess`: labels joints, picks the facing pair, bakes a canonical rest pose. **Cached by mesh content** | ~30 s, once per mesh |
-| **Mesh Sampler** | Generates motion from a prompt | ~20–30 s per clip |
+| **Mesh Sampler** | Generates motion from a prompt. One prompt per line chains longer motions | ~20–30 s per segment |
 | **Mesh Export** | Writes each clip onto the mesh as an animated GLB. Output node — saves to `output/`, shows the result in the node and emits `FILE_3D_GLB` for **Preview 3D** | instant |
 
 ## Things that will bite you
@@ -79,7 +79,31 @@ one prompt. Use `num_repetitions` and keep the best.
 that is being ignored take hold. On a spider, raising 3→6 doubled the per-frame
 foot motion.
 
-**Clips are 2 seconds** (60 frames at 30 fps). That is the model's window.
+**Clips are 2 seconds** (60 frames at 30 fps). That is the model's window, and it
+is fixed: every checkpoint was trained at `max_motion_length = 60`.
+
+**To go longer, put one prompt per line.** Each line is another 2 s segment, and
+the sampler chains them into a single motion (UniMate's `--motion_expand`):
+
+```
+An object walks forward.
+An object turns to the left.
+An object jumps.
+```
+
+Segment *n* has its first `chain_overlap` frames pinned to the last
+`chain_overlap` frames of segment *n-1*, and the flow ODE denoises the rest, so
+continuity comes from the sampler rather than from blending afterwards. Length is
+`60 + (60 - chain_overlap) * (N - 1)` frames — at the default overlap of 10:
+2 s, 3.7 s, 5.3 s, 7 s for 1, 2, 3, 4 lines.
+
+Three things to know about it. It is a **storyboard, not a stretch**: each line
+is a fresh generation, so repeat a line to extend one action. It is **strictly
+sequential** (segment *n* needs *n-1*), so it does not batch — budget one
+sampling pass per line. And it needs **`cfg_scale` > 1.0**, because at 1.0 the
+caption is zeroed and the per-segment prompts would do nothing; the node refuses
+rather than silently generating noise. Raise `chain_overlap` to 15–20 if a
+transition snaps.
 
 **Check the preparation report.** The joint labels and facing pair are what the
 model is conditioned on. The offline labeller is decent but not perfect; a
